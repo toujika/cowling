@@ -1,6 +1,8 @@
-# TDU_ec_project
+# cowling
 
 The weather forecaster IoT with deeplearning and raspberry pi.
+
+Cowling takes over TDU_ec_project.
 
 ## Description
 
