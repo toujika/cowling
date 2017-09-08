@@ -1,4 +1,5 @@
 import argparse
+import pickle
 import socket
 from contextlib import closing
 
@@ -12,7 +13,7 @@ TEST_DATA = '/home/iida/ascetic/TDU_ec_project/data/data_2016_by_time.csv'
 MODEL_DIR = '/home/iida/ascetic/TDU_ec_project/model/'
 
 
-def create_models(time, mode, output='model'):
+def create_train_model(time, mode, output='model'):
   if mode == 'hmd':
     m = models.HumidityPredictor(time=time)
   elif mode == 'prs':
@@ -26,17 +27,17 @@ def create_models(time, mode, output='model'):
   sin = models.SinWavePredictor(time=time)
   pre = sin.create_model(time=time)
   pre = m.learning(pre, models.n_gram(preX, time), models.normalize(prey), output=output+'.h5', epoch=10)
-  model_hmd = m.learning(pre, X, y, output=output+'.h5', epoch=50)
+  model = m.learning(pre, X, y, output=output+'.h5', epoch=50)
   print(output + '.h5 is created.')
 
 
 def recreate_all_models():
   for i in range(3, 10):
-    create_models(time=i, mode='tmp', output='model_tmp' + str(i))
+    create_train_model(time=i, mode='tmp', output='model_tmp' + str(i))
   for i in range(3, 10):
-    create_models(time=i, mode='prs', output='model_prs' + str(i))
+    create_train_model(time=i, mode='prs', output='model_prs' + str(i))
   for i in range(3, 10):
-    create_models(time=i, mode='hmd', output='model_hmd' + str(i))
+    create_train_model(time=i, mode='hmd', output='model_hmd' + str(i))
   output = 'model_wth_by_time'
   wt = models.WeatherPredictor(time=3)
   X, y = wt.make_data(TRAIN_DATA)
@@ -144,7 +145,7 @@ def main(test_data=TEST_DATA):
   host = '127.0.0.1'
   port = 8010
   backlog = 10
-  bufsize = 4096
+  bufsize = 16384
 
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   with closing(sock):
@@ -155,30 +156,40 @@ def main(test_data=TEST_DATA):
       conn, address = sock.accept()
       with closing(conn):
         msg = conn.recv(bufsize)
-        data_length = int(msg.decode('utf-8'))
+        data_length = 30
+        
+        # old code
+        #data_length = int(msg.decode('utf-8'))
+        #t = models.TemperaturePredictor(time=3)
+        #tmp_test_x, tmp_test_y = t.make_data(test_data)
+        #tmp_test_x = tmp_test_x[-data_length:]
+        #p = models.PressurePredictor(time=3)
+        #prs_test_x, prs_test_y = p.make_data(test_data)
+        #prs_test_x = prs_test_x[-data_length:]
+        #h = models.HumidityPredictor(time=3)
+        #hmd_test_x, hmd_test_y = h.make_data(test_data)
+        #hmd_test_x = hmd_test_x[-data_length:]
+        #w = models.WeatherPredictor(time=1) 
+        #test_X, test_y, y_datetime = w.make_data(test_data, datetime_flag=True) # 1-gram data
+        #test_X = test_X[-data_length:]
+        #test_y = test_y[-data_length:]
+        #y_datetime = y_datetime[-data_length:]
 
-        t = models.TemperaturePredictor(time=3)
-        tmp_test_x, tmp_test_y = t.make_data(test_data)
-        tmp_test_x = tmp_test_x[-data_length:]
-        p = models.PressurePredictor(time=3)
-        prs_test_x, prs_test_y = p.make_data(test_data)
-        prs_test_x = prs_test_x[-data_length:]
-        h = models.HumidityPredictor(time=3)
-        hmd_test_x, hmd_test_y = h.make_data(test_data)
-        hmd_test_x = hmd_test_x[-data_length:]
-        w = models.WeatherPredictor(time=1) 
-        test_X, test_y, y_datetime = w.make_data(test_data, datetime_flag=True) # 1-gram data
-        test_X = test_X[-data_length:]
-        test_y = test_y[-data_length:]
-        y_datetime = y_datetime[-data_length:]
+        # new code
+        data = pickle.loads(msg)
+        tmp_test_x = data[0]
+        prs_test_x = data[1]
+        hmd_test_x = data[2]
+        test_x = data[3]
+        test_y = data[4]
+        y_datetime = data[5]
+        
 
         # 2. evaluation
         model_time = 3
         model_time_wth= 3
         idx_start = 0
         idx_end = len(hmd_test_x)
-        mother = 0
-        child = 0
         msg = ''
         msg_full = ''
         for idx in range(idx_start, idx_start + idx_end):
@@ -186,7 +197,6 @@ def main(test_data=TEST_DATA):
           pp, pi= models.recursively_predict(prs_models, prs_test_x[idx:idx + 1], None, first_model_time=model_time, test_length=1)
           tp, ti= models.recursively_predict(tmp_models, tmp_test_x[idx:idx + 1], None, first_model_time=model_time, test_length=1)
           for i in range(7):
-            mother += 1
             if i == 0:
               # tphのテストデータ二次元 ＋ tphの予測一次元
               input_ = np.array([np.concatenate((tmp_test_x[idx:idx + 1][0][1:3], tp[0]), axis=0),
@@ -210,8 +220,6 @@ def main(test_data=TEST_DATA):
             # 最後のidxの情報が、最新のデータによる６時間先までの予測
             msg += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, threshold(pred)) if idx == idx_start + idx_end - 1 else ''
             #msg_full += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, pred)
-            if not threshold(pred) == t:
-              child += 1
 
         conn.send(msg.encode('utf-8'))
 
