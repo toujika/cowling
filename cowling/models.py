@@ -50,6 +50,22 @@ class Predictor(object):
     vector = vector * (nrm[max_] - nrm[min_]) + nrm[min_]
     return vector
 
+  def create_model(self, time=1):
+    hidden_neurons = 50
+    dim_time = time
+    dim_parameter = 1
+    model = Sequential()
+    model.add(LSTM(hidden_neurons, input_shape=(dim_time, dim_parameter), return_sequences=True))
+    model.add(Flatten())
+    model.add(Dense(10))
+    model.add(Activation('sigmoid'))
+    model.add(Dense(1))
+    model.add(Activation('linear'))
+    optimizer = optimizers.RMSprop(clipnorm=1.,clipvalue=0.5)
+    model.compile(loss="mse", optimizer=optimizer)
+    return model
+
+
 class HumidityPredictor(Predictor):
 
   def make_data(self, df_file):
@@ -105,32 +121,6 @@ class HumidityPredictor(Predictor):
       pickle.dump(self.normalizer, f)
       
     return (np.array(X_slice), np.array(Y))
-
-  def create_model(self):
-    dim_parameter = 1
-    dim_time = self.DIM_TIME
-    hidden_neurons = 128
-    out_neurons = 1
-
-    model = Sequential()  
-    model.add(LSTM(
-      hidden_neurons,
-      input_shape=(dim_time, dim_parameter),
-      return_sequences=True))
-    #model.add(LSTM(hidden_neurons,return_sequences=True))
-    model.add(LSTM(hidden_neurons,return_sequences=True))
-    model.add(Flatten())
-    model.add(Dense(32,activity_regularizer=l2(0.01)))
-    model.add(Activation("relu"))
-    model.add(Dropout(0.2))
-    model.add(Dense(10))  
-    model.add(Activation("sigmoid"))  
-    model.add(Dense(1))  
-    model.add(Activation('linear'))
-    optimizer = optimizers.RMSprop(clipnorm=1.,clipvalue=0.5)
-    model.compile(loss="binary_crossentropy", optimizer=optimizer)
-
-    return model
 
 
 class PressurePredictor(Predictor):
@@ -191,7 +181,6 @@ class PressurePredictor(Predictor):
 
 
 class TemperaturePredictor(Predictor):
-
 
   def make_data(self, df_file):
 
@@ -410,21 +399,6 @@ class SinWavePredictor(Predictor):
     y = np.array(y).reshape((batch, 1))
     return X, y
 
-  def create_model(self, time=1):
-    hidden_neurons = 50
-    dim_time = time
-    dim_parameter = 1
-    model = Sequential()
-    model.add(LSTM(hidden_neurons, input_shape=(dim_time, dim_parameter), return_sequences=True))
-    model.add(Flatten())
-    model.add(Dense(10))
-    model.add(Activation('sigmoid'))
-    model.add(Dense(1))
-    model.add(Activation('linear'))
-    optimizer = optimizers.RMSprop(clipnorm=1.,clipvalue=0.5)
-    model.compile(loss="mse", optimizer=optimizer)
-    return model
-
 
 def normalize(vector):
   """ Legacy code, for SinWavePredictor
@@ -479,7 +453,7 @@ def recursively_predict(models, X, y, first_model_time=1, use_n_gram=False, test
       _, _, pred = predict_1D(model, in_[t], 1)
       preds[t].append(pred)
       inputs[t].append(in_[t])
-  return preds, input
+  return preds, inputs
   
 
 def predict_1D(model, input_, iter_):
