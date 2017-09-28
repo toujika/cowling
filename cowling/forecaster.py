@@ -175,6 +175,7 @@ def main(test_data=TEST_DATA):
         #test_y = test_y[-data_length:]
         #y_datetime = y_datetime[-data_length:]
 
+        """
         # new code
         data = pickle.loads(msg)
         tmp_test_x = data[0]
@@ -183,6 +184,28 @@ def main(test_data=TEST_DATA):
         test_x = data[3]
         test_y = data[4]
         y_datetime = data[5]
+        """
+
+        # new code ver2
+        data = pickle.loads(msg)
+        data_length = 50
+        with open(test_data, 'w') as f:
+          f.write(data)
+        t = models.TemperaturePredictor(time=3)
+        tmp_test_x, tmp_test_y = t.make_data(test_data)
+        tmp_test_x = tmp_test_x[-data_length:]
+        p = models.PressurePredictor(time=3)
+        prs_test_x, prs_test_y = p.make_data(test_data)
+        prs_test_x = prs_test_x[-data_length:]
+        h = models.HumidityPredictor(time=3)
+        hmd_test_x, hmd_test_y = h.make_data(test_data)
+        hmd_test_x = hmd_test_x[-data_length:]
+        w = models.WeatherPredictor(time=1) 
+        test_X, test_y, y_datetime = w.make_data(test_data, datetime_flag=True) # 1-gram data
+        test_X = test_X[-data_length:]
+        test_y = test_y[-data_length:]
+        y_datetime = y_datetime[-data_length:]
+
         
 
         # 2. evaluation

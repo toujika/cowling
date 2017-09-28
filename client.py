@@ -6,7 +6,7 @@ import pickle
 import socket
 from contextlib import closing
 
-from cowling import models
+#from cowling import models
 from scripts.process import run_bash
 
 
@@ -21,6 +21,7 @@ def main(host, port, buf_size, test_data):
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   with closing(sock):
     sock.connect((host, port))
+    """
     t = models.TemperaturePredictor(time=3)
     p = models.PressurePredictor(time=3)
     h = models.HumidityPredictor(time=3)
@@ -30,12 +31,11 @@ def main(host, port, buf_size, test_data):
     hmd_test_X, hmd_test_y = h.make_data(test_data)
     test_X, test_y, y_datetime = w.make_data(test_data, datetime_flag=True)
     original_data = [tmp_test_X, prs_test_X, hmd_test_X, test_X, test_y, y_datetime]
+    """
+    original_data = open(test_data).read()
     sock.send(pickle.dumps(original_data))
-    #print(len(sock.recv(buf_size)))
     recv = sock.recv(buf_size)
-    #data = pickle.loads(recv)
     print(recv.decode('utf-8'))
-    #print(data)
   return
 
 if __name__ == '__main__':
