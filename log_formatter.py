@@ -1,4 +1,5 @@
 import glob
+from scripts.process import run_bash
 
 DATA_LOG = '/home/iida/ascetic/cowling/temperature_log'
 OUTPUT_FILE = '/home/iida/ascetic/cowling/data/test_data.csv'

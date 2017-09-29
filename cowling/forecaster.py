@@ -142,7 +142,7 @@ def main(test_data=TEST_DATA):
   threshold = lambda x: 1 if x >= 0.1 else 0
 
   # 2. build the server
-  host = '127.0.0.1'
+  host = ''
   port = 8010
   backlog = 10
   bufsize = 16384
