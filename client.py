@@ -9,12 +9,10 @@ from contextlib import closing
 #from cowling import models
 from scripts.process import run_bash
 
-
 TEST_DATA = '/home/iida/ascetic/TDU_ec_project/data/test_data.csv'
 HOST = '127.0.0.1'
 PORT = 8010
 BUF_SIZE = 16384
-
 
 def main(host, port, buf_size, test_data):
   out, err = run_bash('python log_formatter.py')

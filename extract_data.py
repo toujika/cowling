@@ -1,8 +1,8 @@
+# coding: utf-8
 import argparse
 import subprocess
 
 import pandas as pd
-
 
 def run_bash(command):
   p = subprocess.Popen(command, shell=True, 
@@ -15,7 +15,6 @@ def run_bash(command):
     assert 0
   return (out, err)
 
-
 def rename(filepath):
   # add suffix
   ary = filepath.split('.')
@@ -24,7 +23,6 @@ def rename(filepath):
   ary = dst.split('/')
   filename = ary[-1]
   return filename
-
 
 def main(input_data_file, output_file, working_directory, data_format, header):
   # Make working directory
@@ -36,7 +34,6 @@ def main(input_data_file, output_file, working_directory, data_format, header):
   print('make working directory...')
   out, err = run_bash('mkdir ' + working_directory)
   assert err == ''
-  
 
   # 1. Check and convert character codes
   # Data file character codes is UTF-8 only.
@@ -80,7 +77,6 @@ def main(input_data_file, output_file, working_directory, data_format, header):
   # 5. Save
   df_ex.to_csv(output_file)
   print('save as {}.'.format(output_file))
-    
 
 if __name__ == '__main__':
   # Parse Arguments

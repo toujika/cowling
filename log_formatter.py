@@ -3,6 +3,7 @@ import glob
 DATA_LOG = '/home/iida/ascetic/TDU_ec_project/temperature_log'
 OUTPUT_FILE = '/home/iida/ascetic/TDU_ec_project/data/test_data.csv'
 HEADER = ',年月日時,気温(℃),降水量(mm),現地気圧(hPa),相対湿度(％)'
+NUM_TAIL = 50
 
 def extract_datetime(file_):
   year = file_[4:8]
@@ -26,6 +27,12 @@ def extract_data(data):
   rain = -8888 # dummy number
   return '{},{},{},{}'.format(tmp, rain, prs, hmd)
 
+def tail(num_tail):
+  t, e = run_bash('tail -n {} {}'.format(num_tail, OUTPUT_FILE))
+  h, e = run_bash('head -n 1 {}'.format(OUTPUT_FILE))
+  with open(OUTPUT_FILE, 'w') as f:
+    f.write(h + t)
+
 files = sorted(glob.glob('{}/*'.format(DATA_LOG)))
 
 output = '' + HEADER + '\n'
@@ -39,3 +46,5 @@ for i, file_ in enumerate(files):
 
 with open(OUTPUT_FILE, 'w') as f:
   f.write(output)
+
+tail(NUM_TAIL)
