@@ -1,7 +1,7 @@
 import glob
 
-DATA_LOG = '/home/iida/ascetic/TDU_ec_project/temperature_log'
-OUTPUT_FILE = '/home/iida/ascetic/TDU_ec_project/data/test_data.csv'
+DATA_LOG = '/home/iida/ascetic/cowling/temperature_log'
+OUTPUT_FILE = '/home/iida/ascetic/cowling/data/test_data.csv'
 HEADER = ',年月日時,気温(℃),降水量(mm),現地気圧(hPa),相対湿度(％)'
 NUM_TAIL = 50
 

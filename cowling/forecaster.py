@@ -8,9 +8,9 @@ import numpy as np
 import models
 
 
-TRAIN_DATA = '/home/iida/ascetic/TDU_ec_project/data/data_2015_by_time.csv'
-TEST_DATA = '/home/iida/ascetic/TDU_ec_project/data/data_2016_by_time.csv'
-MODEL_DIR = '/home/iida/ascetic/TDU_ec_project/model/'
+TRAIN_DATA = '/home/iida/ascetic/cowling/data/data_2015_by_time.csv'
+TEST_DATA = '/home/iida/ascetic/cowling/data/data_2016_by_time.csv'
+MODEL_DIR = '/home/iida/ascetic/cowling/model/'
 
 
 def create_train_model(time, mode, output='model'):
