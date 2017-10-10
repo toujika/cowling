@@ -1,10 +1,11 @@
+# coding: utf-8
 import glob
 from scripts.process import run_bash
 
 DATA_LOG = '/home/iida/ascetic/cowling/temperature_log'
 OUTPUT_FILE = '/home/iida/ascetic/cowling/data/test_data.csv'
 HEADER = ',年月日時,気温(℃),降水量(mm),現地気圧(hPa),相対湿度(％)'
-NUM_TAIL = 50
+NUM_TAIL = 10
 
 def extract_datetime(file_):
   year = file_[4:8]

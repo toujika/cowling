@@ -241,7 +241,8 @@ def main(test_data=TEST_DATA):
             dt = y_datetime[model_time_wth + model_time + idx + i] \
                  if model_time_wth + model_time + idx + i < len(test_y) else y_datetime[-1]
             # 最後のidxの情報が、最新のデータによる６時間先までの予測
-            msg += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, threshold(pred)) if idx == idx_start + idx_end - 1 else ''
+            #msg += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, threshold(pred)) if idx == idx_start + idx_end - 1 else '' # long msg
+            msg += 'wth:{}\n'.format(pred) if idx == idx_start + idx_end - 1 else '' # short msg
             #msg_full += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, pred)
 
         conn.send(msg.encode('utf-8'))
