@@ -3,6 +3,7 @@ import pickle
 import socket
 from contextlib import closing
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 import models
@@ -72,7 +73,7 @@ def evaluate(test_data=TEST_DATA):
   
   # 1.4 weather
   w = models.WeatherPredictor(time=1) 
-  test_X, test_y = w.make_data(test_data) # 1-gram data
+  test_X, test_y, y_datetime = w.make_data(test_data, datetime_flag=True) # 1-gram data
   model_wth_by_time = models.Predictor.load_model(models.Predictor, MODEL_DIR + 'model_wth_by_time.h5') # 3-gram model
 
   # 2. evaluation
@@ -84,12 +85,15 @@ def evaluate(test_data=TEST_DATA):
   mother = 0
   child = 0
   over_range = 0
+  t_p_h_pred_teach_i = []
+  msg = ''
+  threshold = lambda x: 1 if x >= 0.1 else 0
   for idx in range(idx_start, idx_start + idx_end):
     hp, hi= models.recursively_predict(hmd_models, hmd_test_x[idx:idx+1], None, first_model_time=model_time, test_length=1)
     pp, pi= models.recursively_predict(prs_models, prs_test_x[idx:idx+1], None, first_model_time=model_time, test_length=1)
     tp, ti= models.recursively_predict(tmp_models, tmp_test_x[idx:idx+1], None, first_model_time=model_time, test_length=1)
     for i in range(7):
-      if model_time + idx + i < len(test_y):
+      if model_time_wth + model_time + idx + i < len(test_y):
         mother += 1
         if i == 0:
           # tphのテストデータ二次元 ＋ tphの予測一次元
@@ -107,15 +111,31 @@ def evaluate(test_data=TEST_DATA):
                              pp[i-model_time_wth+1:i+1],
                              hp[i-model_time_wth+1:i+1]]).reshape((1, 3, 3)).T.reshape((1, 3, 3))
         pred = model_wth_by_time.predict(input_)[0][0]
-        t = test_y[model_time_wth+model_time+idx+i][0]
-        if not (lambda x: 1 if x >= 0.1 else 0)(pred) == t:
+        # idxを起点に、tphがmodel_time分先の予測を行う。これをi回分行う。
+        # さらにwthがmodel_time_wth分先の予測を行う。
+        dt = y_datetime[model_time_wth + model_time + idx + i] \
+             if model_time_wth + model_time + idx + i < len(test_y) else y_datetime[-1]
+        t = test_y[model_time_wth + model_time + idx + i][0]
+        if not threshold(pred) == t:
           child += 1
-        if test_y[model_time+idx+i+1][0] == 1:
-          print('idx-i:{}-{}\ninput_:{}\nwth:{}\nteach[{}]:{}\n'
-                .format(idx, i, input_, pred, model_time+idx+i+1, test_y[model_time+idx+i+1]))
+        # 最後のidxの情報が、最新のデータによる６時間先までの予測
+        if t == 1:
+          msg += '{}\nidx-i:{}-{}\nwth:{}\nt:{}\n\n'.format(dt, idx, i, threshold(pred), t) if idx == idx_start + idx_end - 1 else ''
+        # for graph
+        t_p_h_pred_teach_i.append(np.array([np.mean(np.array(input_[0].T[0])),
+                                          np.mean(np.array(input_[0].T[1])),
+                                          np.mean(np.array(input_[0].T[2])),
+                                          pred,
+                                          t,
+                                          i]))
       else:
           over_range += 1
+  
+  print(msg)
   print('error rate is {}/{}'.format(child, mother))
+  # for graph
+  with open('t_p_h_pred_teach_i.pickle', 'wb') as f:
+    pickle.dump(t_p_h_pred_teach_i, f)
 
 
 def main(test_data=TEST_DATA):
@@ -206,11 +226,9 @@ def main(test_data=TEST_DATA):
         test_y = test_y[-data_length:]
         y_datetime = y_datetime[-data_length:]
 
-        
-
         # 2. evaluation
-        model_time = 3
-        model_time_wth= 3
+        model_time = 3    # tphの予測に使う次元数
+        model_time_wth= 3 # wthの予測に使う次元数
         idx_start = 0
         idx_end = len(hmd_test_x)
         msg = ''
