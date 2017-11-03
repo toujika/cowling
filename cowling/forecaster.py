@@ -232,6 +232,7 @@ def main(test_data=TEST_DATA):
         idx_start = 0
         idx_end = len(hmd_test_x)
         msg = ''
+        msg2 = ''
         msg_full = ''
         for idx in range(idx_start, idx_start + idx_end):
           hp, hi= models.recursively_predict(hmd_models, hmd_test_x[idx:idx + 1], None, first_model_time=model_time, test_length=1)
@@ -259,11 +260,14 @@ def main(test_data=TEST_DATA):
             dt = y_datetime[model_time_wth + model_time + idx + i] \
                  if model_time_wth + model_time + idx + i < len(test_y) else y_datetime[-1]
             # 最後のidxの情報が、最新のデータによる６時間先までの予測
-            #msg += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, threshold(pred)) if idx == idx_start + idx_end - 1 else '' # long msg
+            #msg2 += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, threshold(pred)) if idx == idx_start + idx_end - 1 else '' # long msg
+            msg2 += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, pred) if idx == idx_start + idx_end - 1 else '' # long msg
             msg += 'wth:{}\n'.format(pred) if idx == idx_start + idx_end - 1 else '' # short msg
             #msg_full += '{}\nidx-i:{}-{}\nwth:{}\n\n'.format(dt, idx, i, pred)
 
+        print(msg2)
         conn.send(msg.encode('utf-8'))
+
 
 
 if __name__ == '__main__':

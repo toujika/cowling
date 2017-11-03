@@ -1,0 +1,102 @@
+\documentclass{jsarticle}
+
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{multicol}
+\usepackage{here}
+\usepackage{geometry}
+\geometry{left=25mm,right=25mm,top=20mm,bottom=20mm}
+\usepackage{url}
+\usepackage{listings,jlisting}
+
+\lstset{%
+  language={C},
+  basicstyle={\small},%
+  identifierstyle={\small},%
+  commentstyle={\small\itshape},%
+  keywordstyle={\small\bfseries},%
+  ndkeywordstyle={\small},%
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},%
+  numbers=left,%
+  xrightmargin=0zw,%
+  xleftmargin=3zw,%
+  numberstyle={\scriptsize},%
+  stepnumber=1,
+  numbersep=1zw,%
+  lineskip=-0.5ex%
+}
+
+\title{Neural Weaher Forecaster ―― AIによる天気予報}
+\author{マイコンG班　13EC602 郭柏辰, 14EC004 飯田頌平, 14EC552 陳玉皓, 14EC602 劉宇航}
+
+\begin{document}
+
+  \maketitle
+  
+  \begin{multicols}{2}
+  
+    \section{概要}
+
+      センサから温度・湿度・気圧を計測し、
+      そのデータを人工知能（AI）が考察して天気予報を行います。
+
+      いま、ディスプレイに表示されているのは、
+      \begin{itemize}
+        \item 降水確率[％]
+        \item 気温[℃]
+        \item 気圧[hPa]
+        \item 湿度[％]
+      \end{itemize}
+      です。
+      降水確率は、いまから７時間後までの予測を一気に行い、
+      何時間後にもっとも降水確率が高くなるのか？という情報を表示しています。
+
+      一番雨が振りそうな時点と、その確率が予測できれば、
+      「今日は傘を持っていこうか？」と悩まなくてもよくなります。
+
+    \section{使い方（一般の方向け）}
+
+      何もしなくても大丈夫です。
+      ひとりでに天気予報をしてくれます。
+
+      具体的には、
+      \begin{enumerate}
+        \item 現在の気温・気圧・湿度の測定
+        \item 測定データの記録
+        \item 人工知能によるデータの解析
+        \item ディスプレイへ表示
+      \end{enumerate}
+      といった作業をコンピュータで制御しています。
+      数秒ごとに測定・記録・解析・表示の一連の流れを繰り返すため、
+      常に最新の天気予報を行います。
+
+    \section{使い方（作業者向け）}
+
+      \subsection{自動セットアップ（デフォルト）}
+
+        ラズパイ本体に電源ケーブルを挿して起動すると、
+        自動的にスクリプトが立ち上がります。
+        ディスプレイに予測結果が表示されれば成功です。
+
+      \subsection{マニュアルセットアップ}
+
+        自動セットアップに失敗する時は、手動でスクリプトを立ち上げます。
+        起動後、ラズパイのコンソールにアクセスしてください。
+
+        \begin{itemize}
+          \item \begin{description} \item[ユーザ]デフォルト \end{description}
+          \item \begin{description} \item[パスワード]デフォルト \end{description}
+        \end{itemize}
+        
+        アクセスに成功したら、以下のスクリプトを実行してください。
+        \begin{lstlisting}[caption=起動スクリプト,label=setup]
+          $ cd /home/pi
+          $ ./asahisai.sh
+        \end{lstlisting}
+
+    
+  \end{multicols}
+
+\end{document}
