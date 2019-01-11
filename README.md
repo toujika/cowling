@@ -1,5 +1,7 @@
 # cowling
 
+![cowling](https://github.com/toujika/cowling/cowling.png "cowling")
+
 The weather forecaster IoT with deeplearning and raspberry pi.
 
 Cowling takes over TDU_ec_project.
