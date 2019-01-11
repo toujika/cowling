@@ -1,6 +1,6 @@
 # cowling
 
-![cowling](https://github.com/toujika/cowling/cowling.png "cowling")
+![cowling](./cowling.png "cowling")
 
 The weather forecaster IoT with deeplearning and raspberry pi.
 
